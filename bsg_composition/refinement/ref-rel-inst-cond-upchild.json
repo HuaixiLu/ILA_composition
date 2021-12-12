@@ -1,0 +1,31 @@
+  {
+    "instructions": [
+      {
+        "instruction" : "Outpu0",
+        "ready bound" : 1
+      },
+
+      {
+        "instruction" : "Output1_Send0",
+        "ready bound" : 1
+      },
+
+      {
+        "instruction" : "Output2_Send1",
+        "ready bound" : 1
+      },
+
+      {
+        "instruction" : "Output3_Send2",
+        "ready bound" : 1
+      },
+
+      {
+        "instruction" : "Send3",
+        "ready bound" : 1
+      }
+    ],
+    
+    "global invariants": []
+  
+  }
