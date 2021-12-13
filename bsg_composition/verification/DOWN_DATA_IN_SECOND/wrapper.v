@@ -194,7 +194,7 @@ wire            clk;
 wire            rst;
 always @(posedge clk) begin
 if (rst) __CYCLE_CNT__ <= 0;
-else if ( ( __START__ || __STARTED__ ) &&  __CYCLE_CNT__ < 9) __CYCLE_CNT__ <= __CYCLE_CNT__ + 1;
+else if ( ( __START__ || __STARTED__ ) &&  __CYCLE_CNT__ < 6) __CYCLE_CNT__ <= __CYCLE_CNT__ + 1;
 end
 always @(posedge clk) begin
 if (rst) __START__ <= 0;
@@ -234,8 +234,8 @@ assign __m14__ = io_valid_commit == __ILA_SO_io_valid ;
 assign __m15__ = wptr_decode == __ILA_SO_wptr ;
 assign __m16__ = m1.ch_0_downstream.baf.w_ptr_binary_r == __ILA_SO_wptr ;
 assign __m17__ = m1.ch_0_downstream.baf.w_ptr_binary_r_rsync == __ILA_SO_wptr_t ;
-assign __EDCOND__ = (`false|| ( __CYCLE_CNT__ == 4'd4)) && __STARTED__  ;
-assign __IEND__ = (`false|| ( __CYCLE_CNT__ == 4'd4)) && __STARTED__ && __RESETED__ && (~ __ENDED__) ;
+assign __EDCOND__ = (`false|| ( __CYCLE_CNT__ == 4'd1)) && __STARTED__  ;
+assign __IEND__ = (`false|| ( __CYCLE_CNT__ == 4'd1)) && __STARTED__ && __RESETED__ && (~ __ENDED__) ;
 always @(posedge clk) begin
    if(rst) io_valid <= 0;
    else if (~io_valid && m1.io_valid_i) io_valid <= 1'b1;

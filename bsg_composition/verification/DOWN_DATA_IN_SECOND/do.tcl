@@ -27,8 +27,8 @@ assume -name additional_mapping_control_assume16 {m1.ch_0_downstream.baf.w_data_
 assume -name additional_mapping_control_assume17 {m1.ch_0_downstream.baf.r_data_o == mi0.ila_rdata}
 assume -name additional_mapping_control_assume18 {m1.core_clk_i == m1.io_clk_i}
 assume -name rfassumptions19 {~io_valid || m1.core_clk_i}
-assume -name issue_decode20 {(~ __START__) || (__ILA_BSG_DOWNSTREAM_ch_decode_of_DOWN_DATA_IN_SECOND__)}
-assume -name issue_valid21 {(~ __START__) || (__ILA_BSG_DOWNSTREAM_ch_valid__)}
+assume -name start_condition20 {(~ __START__) || __ILA_BSG_DOWNSTREAM_ch_decode_of_DOWN_DATA_IN_SECOND__}
+assume -name start_condition21 {(~ __START__) || m1.core_clk_i == 0}
 assume -name post_value_holder22 {(~(__CYCLE_CNT__ == 1) || ((io_data_commit) == (m1.ch_0_iddr_data.data_p_r[7:0])))}
 assume -name post_value_holder23 {(~(__CYCLE_CNT__ == 1) || ((io_valid_commit) == (io_valid)))}
 assume -name post_value_holder24 {(~(__CYCLE_CNT__ == 3) || ((wptr_decode) == (m1.ch_0_downstream.baf.w_ptr_binary_r)))}
