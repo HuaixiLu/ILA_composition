@@ -10,7 +10,8 @@ project(BSGOFFCHIP VERSION 1.0 LANGUAGES CXX)
 # VARIABLE
 # alias and configurations
 # ---------------------------------------------------------------------------- #
-set(CMAKE_CXX_COMPILER "g++-9")
+ set(CMAKE_CXX_COMPILER "g++-9")
+ set(CMAKE_PREFIX_PATH /home/huaixil/local)
 set(BSGOFFCHIP_TARGET ${PROJECT_NAME})
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})

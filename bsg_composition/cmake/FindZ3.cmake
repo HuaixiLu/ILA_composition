@@ -18,7 +18,7 @@ pkg_check_modules(PC_Z3 QUIET Z3)
 find_path(Z3_INCLUDE_DIR
   NAMES z3++.h
   HINTS ${PC_Z3_INCLUDEDIR} ${PC_Z3_INCLUDE_DIRS}
-  PATH_SUFFIXES z3
+  #PATH_SUFFIXES z3
 )
 
 find_library(Z3_LIBRARY 

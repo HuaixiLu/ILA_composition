@@ -18,8 +18,9 @@ __VLG_I_core_clk_i,
 __VLG_I_core_yumi_i,
 __VLG_I_io_clk_i,
 __VLG_I_io_valid_i,
-__io_data_commit_init__,
 __io_valid_commit_init__,
+__rptr_commit_init__,
+__token_commit_init__,
 __wptr_decode_init__,
 clk,
 dummy_reset,
@@ -44,6 +45,7 @@ __m11__,
 __m12__,
 __m13__,
 __m14__,
+__m15__,
 __m1__,
 __m2__,
 __m3__,
@@ -63,10 +65,13 @@ __STARTED__,
 __ENDED__,
 __2ndENDED__,
 __RESETED__,
-io_data_commit,
 io_valid_commit,
+rptr_commit,
+token_commit,
 wptr_decode,
-io_valid
+io_valid,
+core_token_r_o_d,
+core_token_out
 );
 input            __ILA_I_core_ready;
 input      [7:0] __ILA_I_io_data_in;
@@ -76,10 +81,11 @@ input      [5:0] __MEM_buffer_0_raddr;
 input      [5:0] __MEM_buffer_0_waddr;
 input            __VLG_I_core_clk_i;
 input            __VLG_I_core_yumi_i;
-input      [1:0] __VLG_I_io_clk_i;
-input      [1:0] __VLG_I_io_valid_i;
-input      [8:0] __io_data_commit_init__;
+input            __VLG_I_io_clk_i;
+input            __VLG_I_io_valid_i;
 input            __io_valid_commit_init__;
+input      [6:0] __rptr_commit_init__;
+input            __token_commit_init__;
 input      [6:0] __wptr_decode_init__;
 input            clk;
 input            dummy_reset;
@@ -104,6 +110,7 @@ output            __m11__;
 output            __m12__;
 output            __m13__;
 output            __m14__;
+output            __m15__;
 output            __m1__;
 output            __m2__;
 output            __m3__;
@@ -123,10 +130,13 @@ output reg            __STARTED__;
 output reg            __ENDED__;
 output reg            __2ndENDED__;
 output reg            __RESETED__;
-output reg      [8:0] io_data_commit;
 output reg            io_valid_commit;
+output reg      [6:0] rptr_commit;
+output reg            token_commit;
 output reg      [6:0] wptr_decode;
 output reg            io_valid;
+output reg            core_token_r_o_d;
+output reg            core_token_out;
 wire            __2ndIEND__;
 (* keep *) wire            __EDCOND__;
 (* keep *) wire            __IEND__;
@@ -155,9 +165,8 @@ wire            __2ndIEND__;
 (* keep *) wire            __MEM_buffer_0_wen;
 (* keep *) wire            __VLG_I_core_clk_i;
 (* keep *) wire            __VLG_I_core_yumi_i;
-(* keep *) wire      [1:0] __VLG_I_io_clk_i;
-(* keep *) wire      [1:0] __VLG_I_io_valid_i;
-wire      [8:0] __io_data_commit_init__;
+(* keep *) wire            __VLG_I_io_clk_i;
+(* keep *) wire            __VLG_I_io_valid_i;
 wire            __io_valid_commit_init__;
 (* keep *) wire            __m0__;
 (* keep *) wire            __m10__;
@@ -165,6 +174,7 @@ wire            __io_valid_commit_init__;
 (* keep *) wire            __m12__;
 (* keep *) wire            __m13__;
 (* keep *) wire            __m14__;
+(* keep *) wire            __m15__;
 (* keep *) wire            __m1__;
 (* keep *) wire            __m2__;
 (* keep *) wire            __m3__;
@@ -174,6 +184,8 @@ wire            __io_valid_commit_init__;
 (* keep *) wire            __m7__;
 (* keep *) wire            __m8__;
 (* keep *) wire            __m9__;
+wire      [6:0] __rptr_commit_init__;
+wire            __token_commit_init__;
 wire      [6:0] __wptr_decode_init__;
 (* keep *) wire            buffer_EQ_;
 wire            clk;
@@ -184,7 +196,7 @@ wire            clk;
 wire            rst;
 always @(posedge clk) begin
 if (rst) __CYCLE_CNT__ <= 0;
-else if ( ( __START__ || __STARTED__ ) &&  __CYCLE_CNT__ < 6) __CYCLE_CNT__ <= __CYCLE_CNT__ + 1;
+else if ( ( __START__ || __STARTED__ ) &&  __CYCLE_CNT__ < 7) __CYCLE_CNT__ <= __CYCLE_CNT__ + 1;
 end
 always @(posedge clk) begin
 if (rst) __START__ <= 0;
@@ -207,29 +219,35 @@ always @(posedge clk) begin
 if (rst) __RESETED__ <= 1;
 end
 assign __m0__ = m1.ch_0_downstream.data_commit == __ILA_SO_core_data0 ;
-assign __m1__ = m1.core_data_o == __ILA_SO_core_data_out ;
-assign __m2__ = m1.core_valid_o == __ILA_SO_core_valid_out ;
-assign __m3__ = m1.ch_0_downstream.baf.w_full_o == __ILA_SO_full ;
-assign __m4__ = io_data_commit == __ILA_SO_io_data ;
-assign __m5__ = m1.core_token_r_o == __ILA_SO_io_token_out ;
-assign __m6__ = io_valid == __ILA_SO_io_valid ;
-assign __m7__ = io_valid_commit == __ILA_SO_io_valid ;
-assign __m8__ = m1.ch_0_downstream.baf.r_ptr_binary_r == __ILA_SO_rptr ;
+assign __m1__ = m1.core_valid_o == __ILA_SO_core_valid_out ;
+assign __m2__ = m1.ch_0_downstream.baf.w_full_o == __ILA_SO_full ;
+assign __m3__ = core_token_out == __ILA_SO_io_token_out ;
+assign __m4__ = token_commit == __ILA_SO_io_token_out ;
+assign __m5__ = io_valid == __ILA_SO_io_valid ;
+assign __m6__ = io_valid_commit == __ILA_SO_io_valid ;
+assign __m7__ = m1.ch_0_downstream.baf.r_ptr_binary_r == __ILA_SO_rptr ;
+assign __m8__ = rptr_commit == __ILA_SO_rptr ;
 assign __m9__ = wptr_decode == __ILA_SO_wptr ;
 assign __m10__ = m1.ch_0_downstream.baf.w_ptr_binary_r == __ILA_SO_wptr ;
 assign __m11__ = m1.ch_0_downstream.baf.w_ptr_binary_r_rsync == __ILA_SO_wptr_t ;
 assign __m12__ = m1.ch_0_downstream.data_commit == __ILA_SO_core_data0 ;
 assign __m13__ = m1.ch_0_downstream.baf.w_full_o == __ILA_SO_full ;
 assign __m14__ = m1.ch_0_downstream.baf.r_ptr_binary_r == __ILA_SO_rptr ;
-assign __EDCOND__ = (`false|| ( __CYCLE_CNT__ == 4'd1)) && __STARTED__  ;
-assign __IEND__ = (`false|| ( __CYCLE_CNT__ == 4'd1)) && __STARTED__ && __RESETED__ && (~ __ENDED__) ;
+assign __m15__ = rptr_commit == __ILA_SO_rptr ;
+assign __EDCOND__ = (`false|| ( __CYCLE_CNT__ == 4'd2)) && __STARTED__  ;
+assign __IEND__ = (`false|| ( __CYCLE_CNT__ == 4'd2)) && __STARTED__ && __RESETED__ && (~ __ENDED__) ;
 always @(posedge clk) begin
    if(rst) io_valid <= 0;
    else if (~io_valid && m1.io_valid_i) io_valid <= 1'b1;
    else io_valid <= 1'b0;
 end
+always @(posedge m1.core_clk_i) begin
+   if(rst) core_token_r_o_d <= 0;
+   else core_token_r_o_d <= core_token_r_o[0];
+end
+assign core_token_out = core_token_r_o_d ^ core_token_r_o;
 
-assign __MEM_buffer_0_wen = m1.ch_0_downstream.baf.w_enq_i && (m1.core_clk_i == 1'b0) && (__CYCLE_CNT__ >= 3) ;
+assign __MEM_buffer_0_wen = m1.ch_0_downstream.baf.w_enq_i && (__CYCLE_CNT__ == 3)  ;
 /*buffer*/
 absmem_ra #( 
     .AW(6),
@@ -292,13 +310,15 @@ bsg_link_ddr_downstream m1(
 );
 always @(posedge clk) begin
    if(rst) begin
-       io_data_commit <= __io_data_commit_init__;
        io_valid_commit <= __io_valid_commit_init__;
+       rptr_commit <= __rptr_commit_init__;
+       token_commit <= __token_commit_init__;
        wptr_decode <= __wptr_decode_init__;
    end
    else if(1) begin
-       io_data_commit <= io_data_commit;
        io_valid_commit <= io_valid_commit;
+       rptr_commit <= rptr_commit;
+       token_commit <= token_commit;
        wptr_decode <= wptr_decode;
    end
 end
