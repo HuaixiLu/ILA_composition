@@ -10,8 +10,7 @@
         "data_cycle_1"    : "m1.out_piso.data_o",
         "child_valid"     : "~m1.out_piso.ready_and_o",
         "sent_cnt"        : "#sent_counter#",
-        "finish_cnt"      : [["__START__", "#finish_counter#"],
-                            ["__IEND__",  "#finish_cnt_holder#"]]
+        "finish_cnt"      : "#finish_counter#"
     },
 
     "value-holder" : {
@@ -19,12 +18,6 @@
           "cond": "(__START__ || __STARTED__) && m1.out_piso.shift_ctr_r == 0",
           "val" : "m1.out_piso.data_o",
           "width": "auto"
-        },
-
-        "finish_cnt_holder":{
-            "cond" : "__CYCLE_CNT__ == 2",
-            "val" : "#finish_counter#",
-            "width" : 7
         }
       },
 

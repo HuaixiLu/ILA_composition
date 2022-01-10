@@ -15,7 +15,6 @@ __ISSUE__,
 __VLG_I_core_clk_i,
 __VLG_I_token_clk_i,
 __data0_init__,
-__finish_cnt_holder_init__,
 clk,
 dummy_reset,
 rst,
@@ -37,7 +36,6 @@ __m4__,
 __m5__,
 __m6__,
 __m7__,
-__m8__,
 io_data_r_o,
 io_valid_r_o,
 __CYCLE_CNT__,
@@ -47,7 +45,6 @@ __ENDED__,
 __2ndENDED__,
 __RESETED__,
 data0,
-finish_cnt_holder,
 sent_counter,
 finish_counter,
 valid_i,
@@ -62,7 +59,6 @@ input            __ISSUE__;
 input            __VLG_I_core_clk_i;
 input      [1:0] __VLG_I_token_clk_i;
 input     [31:0] __data0_init__;
-input      [6:0] __finish_cnt_holder_init__;
 input            clk;
 input            dummy_reset;
 input            rst;
@@ -84,7 +80,6 @@ output            __m4__;
 output            __m5__;
 output            __m6__;
 output            __m7__;
-output            __m8__;
 output     [15:0] io_data_r_o;
 output      [1:0] io_valid_r_o;
 output reg      [7:0] __CYCLE_CNT__;
@@ -94,7 +89,6 @@ output reg            __ENDED__;
 output reg            __2ndENDED__;
 output reg            __RESETED__;
 output reg     [31:0] data0;
-output reg      [6:0] finish_cnt_holder;
 output reg      [6:0] sent_counter;
 output reg      [6:0] finish_counter;
 output reg            valid_i;
@@ -123,7 +117,6 @@ wire            __2ndIEND__;
 (* keep *) wire            __VLG_O_core_ready_o;
 (* keep *) wire      [1:0] __VLG_O_io_clk_r_o;
 wire     [31:0] __data0_init__;
-wire      [6:0] __finish_cnt_holder_init__;
 (* keep *) wire            __m0__;
 (* keep *) wire            __m1__;
 (* keep *) wire            __m2__;
@@ -132,7 +125,6 @@ wire      [6:0] __finish_cnt_holder_init__;
 (* keep *) wire            __m5__;
 (* keep *) wire            __m6__;
 (* keep *) wire            __m7__;
-(* keep *) wire            __m8__;
 wire            clk;
 (* keep *) wire            dummy_reset;
 (* keep *) wire     [15:0] io_data_r_o;
@@ -169,11 +161,10 @@ assign __m0__ = ~m1.out_piso.ready_and_o == __ILA_SO_child_valid ;
 assign __m1__ = data0 == __ILA_SO_data_cycle_0 ;
 assign __m2__ = m1.out_piso.data_o == __ILA_SO_data_cycle_1 ;
 assign __m3__ = finish_counter == __ILA_SO_finish_cnt ;
-assign __m4__ = finish_cnt_holder == __ILA_SO_finish_cnt ;
-assign __m5__ = sent_counter == __ILA_SO_sent_cnt ;
-assign __m6__ = ~m1.out_piso.ready_and_o == __ILA_SO_child_valid ;
-assign __m7__ = data0 == __ILA_SO_data_cycle_0 ;
-assign __m8__ = m1.out_piso.data_o == __ILA_SO_data_cycle_1 ;
+assign __m4__ = sent_counter == __ILA_SO_sent_cnt ;
+assign __m5__ = ~m1.out_piso.ready_and_o == __ILA_SO_child_valid ;
+assign __m6__ = data0 == __ILA_SO_data_cycle_0 ;
+assign __m7__ = m1.out_piso.data_o == __ILA_SO_data_cycle_1 ;
 assign __EDCOND__ = (`false|| (m1.out_piso.shift_ctr_r)) && __STARTED__  ;
 assign __IEND__ = (`false|| (m1.out_piso.shift_ctr_r)) && __STARTED__ && __RESETED__ && (~ __ENDED__)&& ( __CYCLE_CNT__ <= 50) ;
 assign sent_counter = m1.ch_0_sso.pos_credit_ctr.r_counter_r[5:0] + m1.ch_0_sso.neg_credit_ctr.r_counter_r[5:0];
@@ -232,11 +223,9 @@ bsg_link_ddr_upstream m1(
 always @(posedge clk) begin
    if(rst) begin
        data0 <= __data0_init__;
-       finish_cnt_holder <= __finish_cnt_holder_init__;
    end
    else if(1) begin
        data0 <= data0;
-       finish_cnt_holder <= finish_cnt_holder;
    end
 end
 endmodule
