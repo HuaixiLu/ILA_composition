@@ -87,7 +87,7 @@ output            __m7__;
 output            __m8__;
 output     [15:0] io_data_r_o;
 output      [1:0] io_valid_r_o;
-output reg      [3:0] __CYCLE_CNT__;
+output reg      [7:0] __CYCLE_CNT__;
 output reg            __START__;
 output reg            __STARTED__;
 output reg            __ENDED__;
@@ -143,7 +143,7 @@ wire            clk;
 wire            rst;
 always @(posedge clk) begin
 if (rst) __CYCLE_CNT__ <= 0;
-else if ( ( __START__ || __STARTED__ ) &&  __CYCLE_CNT__ < 9) __CYCLE_CNT__ <= __CYCLE_CNT__ + 1;
+else if ( ( __START__ || __STARTED__ ) &&  __CYCLE_CNT__ < 132) __CYCLE_CNT__ <= __CYCLE_CNT__ + 1;
 end
 always @(posedge clk) begin
 if (rst) __START__ <= 0;
@@ -174,8 +174,8 @@ assign __m5__ = sent_counter == __ILA_SO_sent_cnt ;
 assign __m6__ = ~m1.out_piso.ready_and_o == __ILA_SO_child_valid ;
 assign __m7__ = data0 == __ILA_SO_data_cycle_0 ;
 assign __m8__ = m1.out_piso.data_o == __ILA_SO_data_cycle_1 ;
-assign __EDCOND__ = (`false|| ( __CYCLE_CNT__ == 4'd4)) && __STARTED__  ;
-assign __IEND__ = (`false|| ( __CYCLE_CNT__ == 4'd4)) && __STARTED__ && __RESETED__ && (~ __ENDED__) ;
+assign __EDCOND__ = (`false|| (m1.out_piso.shift_ctr_r)) && __STARTED__  ;
+assign __IEND__ = (`false|| (m1.out_piso.shift_ctr_r)) && __STARTED__ && __RESETED__ && (~ __ENDED__)&& ( __CYCLE_CNT__ <= 50) ;
 assign sent_counter = m1.ch_0_sso.pos_credit_ctr.r_counter_r[5:0] + m1.ch_0_sso.neg_credit_ctr.r_counter_r[5:0];
 assign finish_counter = {(m1.ch_0_sso.pos_credit_ctr.w_counter_binary_r_rsync[3:0] + m1.ch_0_sso.neg_credit_ctr.w_counter_binary_r_rsync[3:0]),3'b000};
 

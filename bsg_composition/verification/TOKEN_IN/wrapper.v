@@ -175,14 +175,14 @@ assign __IEND__ = (`false|| ( __CYCLE_CNT__ == 4'd4)) && __STARTED__ && __RESETE
 assign sent_counter = m1.ch_0_sso.pos_credit_ctr.r_counter_r[5:0] + m1.ch_0_sso.neg_credit_ctr.r_counter_r[5:0];
 assign finish_counter = {(m1.ch_0_sso.pos_credit_ctr.w_counter_binary_r_rsync[3:0] + m1.ch_0_sso.neg_credit_ctr.w_counter_binary_r_rsync[3:0]),3'b000};
 
-always @(posedge __ILA_I_core_clk) begin
+always @(posedge __VLG_I_core_clk_i) begin
     if(rst) begin valid_i <= 0; data_i <=0; end
     else
        if(valid_i == 0 || (valid_i == 1 && m1.core_ready_o) ) begin 
           valid_i <= random_valid; data_i <= random_data; end
 end
 
-always @(posedge __ILA_I_core_clk) begin
+always @(posedge __VLG_I_core_clk_i) begin
    if(rst) begin io_token <= 0; token_clk_i <= 0; end
    else if (random_token) begin
        io_token <= 1;

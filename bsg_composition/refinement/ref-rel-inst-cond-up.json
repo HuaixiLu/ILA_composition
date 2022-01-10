@@ -2,7 +2,8 @@
     "instructions": [
       {
         "instruction" : "DATA_IN",
-        "ready bound" : 4
+        "ready signal" : "m1.out_piso.shift_ctr_r",
+        "max bound": 50
         //"type": "no output"
       },
 
