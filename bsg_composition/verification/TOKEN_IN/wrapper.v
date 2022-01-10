@@ -140,7 +140,7 @@ wire            clk;
 wire            rst;
 always @(posedge clk) begin
 if (rst) __CYCLE_CNT__ <= 0;
-else if ( ( __START__ || __STARTED__ ) &&  __CYCLE_CNT__ < 9) __CYCLE_CNT__ <= __CYCLE_CNT__ + 1;
+else if ( ( __START__ || __STARTED__ ) &&  __CYCLE_CNT__ < 7) __CYCLE_CNT__ <= __CYCLE_CNT__ + 1;
 end
 always @(posedge clk) begin
 if (rst) __START__ <= 0;
@@ -170,8 +170,8 @@ assign __m4__ = finish_cnt_holder == __ILA_SO_finish_cnt ;
 assign __m5__ = sent_counter == __ILA_SO_sent_cnt ;
 assign __m6__ = finish_counter == __ILA_SO_finish_cnt ;
 assign __m7__ = finish_cnt_holder == __ILA_SO_finish_cnt ;
-assign __EDCOND__ = (`false|| ( __CYCLE_CNT__ == 4'd4)) && __STARTED__  ;
-assign __IEND__ = (`false|| ( __CYCLE_CNT__ == 4'd4)) && __STARTED__ && __RESETED__ && (~ __ENDED__) ;
+assign __EDCOND__ = (`false|| ( __CYCLE_CNT__ == 4'd2)) && __STARTED__  ;
+assign __IEND__ = (`false|| ( __CYCLE_CNT__ == 4'd2)) && __STARTED__ && __RESETED__ && (~ __ENDED__) ;
 assign sent_counter = m1.ch_0_sso.pos_credit_ctr.r_counter_r[5:0] + m1.ch_0_sso.neg_credit_ctr.r_counter_r[5:0];
 assign finish_counter = {(m1.ch_0_sso.pos_credit_ctr.w_counter_binary_r_rsync[3:0] + m1.ch_0_sso.neg_credit_ctr.w_counter_binary_r_rsync[3:0]),3'b000};
 

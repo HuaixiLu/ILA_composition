@@ -9,7 +9,7 @@
 
       {
         "instruction" : "TOKEN_IN",
-        "ready bound" : 4
+        "ready bound" : 2
         //"type": "no output"
       }
     ],

@@ -22,7 +22,7 @@
         },
 
         "finish_cnt_holder":{
-            "cond" : "__CYCLE_CNT__ == 1",
+            "cond" : "__CYCLE_CNT__ == 2",
             "val" : "#finish_counter#",
             "width" : 7
         }
