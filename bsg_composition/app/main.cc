@@ -127,10 +127,9 @@ int main() {
   BSG_UPSTREAM upstream_ila;
   BSG_DOWNSTREAM downstream_ila;
 
-  //verify_upstream_child(upstream_ila.model, vtg_cfg, upstream_design_files);
+  verify_upstream_child(upstream_ila.model, vtg_cfg, upstream_design_files);
   //verify_upstream(upstream_ila.model, vtg_cfg, upstream_design_files);
-  verify_downstream(downstream_ila.model, vtg_cfg, downstream_design_files);
-  //verify_downstream_child(downstream_ila.model, vtg_cfg, downstream_design_files);
+  //verify_downstream(downstream_ila.model, vtg_cfg, downstream_design_files);
 
   return 0;
 }

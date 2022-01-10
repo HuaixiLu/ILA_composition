@@ -39,6 +39,8 @@ __m4__,
 __m5__,
 __m6__,
 __m7__,
+__m8__,
+__m9__,
 io_data_r_o,
 io_valid_r_o,
 __CYCLE_CNT__,
@@ -48,9 +50,10 @@ __ENDED__,
 __2ndENDED__,
 __RESETED__,
 cnt_oddr,
-sent_counter,
-finish_counter,
-data,
+data_delay,
+cnt,
+valid_delay,
+child_valid_d,
 commit,
 io_token,
 token_clk_i
@@ -63,7 +66,7 @@ input            __VLG_I_core_clk_i;
 input     [63:0] __VLG_I_core_data_i;
 input            __VLG_I_core_valid_i;
 input      [1:0] __VLG_I_token_clk_i;
-input            __cnt_oddr_init__;
+input      [1:0] __cnt_oddr_init__;
 input            clk;
 input            dummy_reset;
 input            rst;
@@ -86,6 +89,8 @@ output            __m4__;
 output            __m5__;
 output            __m6__;
 output            __m7__;
+output            __m8__;
+output            __m9__;
 output     [15:0] io_data_r_o;
 output      [1:0] io_valid_r_o;
 output reg      [3:0] __CYCLE_CNT__;
@@ -94,10 +99,11 @@ output reg            __STARTED__;
 output reg            __ENDED__;
 output reg            __2ndENDED__;
 output reg            __RESETED__;
-output reg            cnt_oddr;
-output reg      [6:0] sent_counter;
-output reg      [6:0] finish_counter;
-output reg     [31:0] data;
+output reg      [1:0] cnt_oddr;
+output reg     [31:0] data_delay;
+output reg      [1:0] cnt;
+output reg            valid_delay;
+output reg            child_valid_d;
 output reg            commit;
 output reg            io_token;
 output reg            token_clk_i;
@@ -125,7 +131,7 @@ wire            __2ndIEND__;
 (* keep *) wire      [1:0] __VLG_I_token_clk_i;
 (* keep *) wire            __VLG_O_core_ready_o;
 (* keep *) wire      [1:0] __VLG_O_io_clk_r_o;
-wire            __cnt_oddr_init__;
+wire      [1:0] __cnt_oddr_init__;
 (* keep *) wire            __m0__;
 (* keep *) wire            __m1__;
 (* keep *) wire            __m2__;
@@ -134,12 +140,21 @@ wire            __cnt_oddr_init__;
 (* keep *) wire            __m5__;
 (* keep *) wire            __m6__;
 (* keep *) wire            __m7__;
+(* keep *) wire            __m8__;
+(* keep *) wire            __m9__;
+(* keep *) wire            child_valid;
 wire            clk;
+(* keep *) wire     [31:0] data;
+(* keep *) wire     [31:0] data_check;
 (* keep *) wire            dummy_reset;
+(* keep *) wire      [6:0] finish_counter;
 (* keep *) wire     [15:0] io_data_r_o;
 (* keep *) wire      [1:0] io_valid_r_o;
 (* keep *) wire            random_token;
+(* keep *) wire      [6:0] ready_counter;
 wire            rst;
+(* keep *) wire      [6:0] sent_counter;
+(* keep *) wire            valid_check;
 always @(posedge clk) begin
 if (rst) __CYCLE_CNT__ <= 0;
 else if ( ( __START__ || __STARTED__ ) &&  __CYCLE_CNT__ < 6) __CYCLE_CNT__ <= __CYCLE_CNT__ + 1;
@@ -164,19 +179,34 @@ assign __2ndIEND__ = __ENDED__ && __EDCOND__ && ~__2ndENDED__ ;
 always @(posedge clk) begin
 if (rst) __RESETED__ <= 1;
 end
-assign __m0__ = m1.ch_0_sso.io_async_fifo_valid == __ILA_SO_child_valid ;
-assign __m1__ = m1.ch_0_oddr_phy.ready_o == __ILA_SO_child_valid ;
-assign __m2__ = data == __ILA_SO_data_cycle_0 ;
-assign __m3__ = data == __ILA_SO_data_cycle_1 ;
-assign __m4__ = finish_counter == __ILA_SO_finish_cnt ;
+assign __m0__ = child_valid == __ILA_SO_child_valid ;
+assign __m1__ = data_check == __ILA_SO_data_cycle_0 ;
+assign __m2__ = data_check == __ILA_SO_data_cycle_1 ;
+assign __m3__ = finish_counter == __ILA_SO_finish_cnt ;
+assign __m4__ = valid_check == __ILA_SO_io_valid_out ;
 assign __m5__ = sent_counter == __ILA_SO_sent_cnt ;
-assign __m6__ = m1.ch_0_sso.io_async_fifo_valid == __ILA_SO_child_valid ;
-assign __m7__ = m1.ch_0_oddr_phy.ready_o == __ILA_SO_child_valid ;
+assign __m6__ = cnt == __ILA_SO_step ;
+assign __m7__ = cnt_oddr == __ILA_SO_step ;
+assign __m8__ = child_valid == __ILA_SO_child_valid ;
+assign __m9__ = valid_check == __ILA_SO_io_valid_out ;
 assign __EDCOND__ = (`false|| ( __CYCLE_CNT__ == 4'd1)) && __STARTED__  ;
 assign __IEND__ = (`false|| ( __CYCLE_CNT__ == 4'd1)) && __STARTED__ && __RESETED__ && (~ __ENDED__) ;
 assign sent_counter = m1.ch_0_sso.pos_credit_ctr.r_counter_r[5:0] + m1.ch_0_sso.neg_credit_ctr.r_counter_r[5:0] - 7'b1000000;
 assign finish_counter = {(m1.ch_0_sso.pos_credit_ctr.w_counter_binary_r_rsync[3:0] + m1.ch_1_sso.neg_credit_ctr.w_counter_binary_r_rsync[3:0]),3'b000};
+assign ready_counter = sent_counter - finish_counter;
 assign data = {m1.ch_1_sso.io_async_fifo_data[15:0], 16'b0} + m1.ch_0_sso.io_async_fifo_data[15:0];
+always @(posedge clk) begin
+   data_delay <= data; valid_delay <= m1.io_valid_r_o[0]; end
+assign data_check = (m1.ch_0_oddr_phy.odd_r == 1'b1 ? data_delay : data);
+assign valid_check = (m1.ch_0_oddr_phy.odd_r == 1'b1 ? valid_delay: m1.io_valid_r_o[0]);
+always @(posedge clk) begin
+   if(rst) begin cnt <= 0; child_valid_d <= 0; end
+   else begin
+        child_valid_d <= m1.ch_0_sso.io_async_fifo_valid;
+        if ((m1.ch_0_sso.io_async_fifo_valid & m1.ch_0_oddr_phy.ready_o & (ready_counter < 7'b1000000)) || (cnt != 0) )
+             cnt <= cnt + 1; end
+end
+assign child_valid = m1.ch_0_sso.io_async_fifo_valid || child_valid_d || m1.io_valid_r_o[0];
 
 always @(posedge clk) begin 
     if(m1.ch_0_oddr_phy.data_i[8] && m1.ch_0_oddr_phy.ready_o)

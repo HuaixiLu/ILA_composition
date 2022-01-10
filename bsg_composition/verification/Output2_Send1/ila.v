@@ -40,9 +40,9 @@ wire            __ILA_BSG_UPSTREAM_OUT_decode_of_Output2_Send1__;
 wire            __ILA_BSG_UPSTREAM_OUT_valid__;
 wire            __START__;
 wire            bv_1_1_n0__$75;
-wire      [1:0] bv_2_2_n7__$126;
-wire      [1:0] bv_2_3_n15__$145;
-wire      [6:0] bv_7_1_n11__$142;
+wire      [1:0] bv_2_2_n7__$122;
+wire      [1:0] bv_2_3_n15__$141;
+wire      [6:0] bv_7_1_n11__$138;
 wire      [6:0] bv_7_64_n3__$70;
 (* keep *) wire            child_valid_randinit;
 wire            clk;
@@ -55,16 +55,16 @@ wire            core_valid_in;
 (* keep *) wire      [7:0] io_data_out_ch1_randinit;
 wire            io_token;
 (* keep *) wire            io_valid_out_randinit;
-wire      [6:0] n12__$144;
-wire      [7:0] n13__$136;
-wire      [7:0] n14__$138;
+wire      [6:0] n12__$140;
+wire      [7:0] n13__$132;
+wire      [7:0] n14__$134;
 wire            n1__$77;
 wire      [6:0] n2__$72;
 wire            n4__$73;
-wire            n5__$132;
-wire            n6__$134;
-wire            n8__$128;
-wire            n9__$135;
+wire            n5__$128;
+wire            n6__$130;
+wire            n8__$124;
+wire            n9__$131;
 wire            rst;
 (* keep *) wire      [6:0] sent_cnt_randinit;
 (* keep *) wire      [1:0] step_randinit;
@@ -74,17 +74,17 @@ assign __ILA_BSG_UPSTREAM_OUT_valid__ = n1__$77 ;
 assign n2__$72 =  ( sent_cnt ) - ( finish_cnt )  ;
 assign bv_7_64_n3__$70 = 7'h40 ;
 assign n4__$73 =  ( n2__$72 ) < ( bv_7_64_n3__$70 )  ;
-assign n5__$132 =  ( io_valid_out ) == ( bv_1_1_n0__$75 )  ;
-assign n6__$134 =  ( n4__$73 ) & (n5__$132 )  ;
-assign bv_2_2_n7__$126 = 2'h2 ;
-assign n8__$128 =  ( step ) == ( bv_2_2_n7__$126 )  ;
-assign n9__$135 =  ( n6__$134 ) & (n8__$128 )  ;
-assign __ILA_BSG_UPSTREAM_OUT_decode_of_Output2_Send1__ = n9__$135 ;
-assign bv_7_1_n11__$142 = 7'h1 ;
-assign n12__$144 =  ( sent_cnt ) + ( bv_7_1_n11__$142 )  ;
-assign n13__$136 = data_cycle_1[7:0] ;
-assign n14__$138 = data_cycle_1[23:16] ;
-assign bv_2_3_n15__$145 = 2'h3 ;
+assign n5__$128 =  ( io_valid_out ) == ( bv_1_1_n0__$75 )  ;
+assign n6__$130 =  ( n4__$73 ) & (n5__$128 )  ;
+assign bv_2_2_n7__$122 = 2'h2 ;
+assign n8__$124 =  ( step ) == ( bv_2_2_n7__$122 )  ;
+assign n9__$131 =  ( n6__$130 ) & (n8__$124 )  ;
+assign __ILA_BSG_UPSTREAM_OUT_decode_of_Output2_Send1__ = n9__$131 ;
+assign bv_7_1_n11__$138 = 7'h1 ;
+assign n12__$140 =  ( sent_cnt ) + ( bv_7_1_n11__$138 )  ;
+assign n13__$132 = data_cycle_1[7:0] ;
+assign n14__$134 = data_cycle_1[23:16] ;
+assign bv_2_3_n15__$141 = 2'h3 ;
 always @(posedge clk) begin
    if(rst) begin
        child_valid <= child_valid_randinit ;
@@ -116,19 +116,19 @@ always @(posedge clk) begin
            data_cycle_1 <= data_cycle_1 ;
        end
        if (__ILA_BSG_UPSTREAM_OUT_decode_of_Output2_Send1__) begin
-           sent_cnt <= n12__$144 ;
+           sent_cnt <= n12__$140 ;
        end
        if (__ILA_BSG_UPSTREAM_OUT_decode_of_Output2_Send1__) begin
            finish_cnt <= finish_cnt ;
        end
        if (__ILA_BSG_UPSTREAM_OUT_decode_of_Output2_Send1__) begin
-           io_data_out_ch0 <= n13__$136 ;
+           io_data_out_ch0 <= n13__$132 ;
        end
        if (__ILA_BSG_UPSTREAM_OUT_decode_of_Output2_Send1__) begin
-           io_data_out_ch1 <= n14__$138 ;
+           io_data_out_ch1 <= n14__$134 ;
        end
        if (__ILA_BSG_UPSTREAM_OUT_decode_of_Output2_Send1__) begin
-           step <= bv_2_3_n15__$145 ;
+           step <= bv_2_3_n15__$141 ;
        end
    end
 end

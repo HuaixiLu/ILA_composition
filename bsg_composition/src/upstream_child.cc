@@ -18,7 +18,7 @@ void BSG_UPSTREAM::AddChild(InstrRef& inst) {
 
   { // First Cycle of Output: positive // Produce
     auto instr = child.NewInstr("Output0");
-    instr.SetDecode(child_valid == BvConst(1,1) & step == BvConst(0,2));
+    instr.SetDecode(child_valid == BvConst(1,1) & ready & step == BvConst(0,2));
 
     for (int i = 0; i < CHANNEL_NUM; i++){
         instr.SetUpdate(io_data_out[i], 
@@ -32,7 +32,7 @@ void BSG_UPSTREAM::AddChild(InstrRef& inst) {
 
   { // First Cycle of Output: negative // Send & Produce
     auto instr = child.NewInstr("Output1_Send0");
-    instr.SetDecode(ready & io_valid_out == BvConst(1,1) & step == BvConst(1,2));
+    instr.SetDecode(step == BvConst(1,2) & ready);
 
     for (int i = 0; i < CHANNEL_NUM; i++){
         instr.SetUpdate(io_data_out[i], 
@@ -58,7 +58,7 @@ void BSG_UPSTREAM::AddChild(InstrRef& inst) {
 
   { // Second Cycle of Output : negative
     auto instr = child.NewInstr("Output3_Send2"); // Send & Produce
-    instr.SetDecode(io_valid_out == BvConst(1,1) & step == BvConst(3,2));
+    instr.SetDecode(io_valid_out == BvConst(1,1) & step == BvConst(3,2) & ready);
 
     for (int i = 0; i < CHANNEL_NUM; i++){
         instr.SetUpdate(io_data_out[i], 
@@ -68,11 +68,11 @@ void BSG_UPSTREAM::AddChild(InstrRef& inst) {
     instr.SetUpdate(step, BvConst(0,2));
   }
 
-    { // Final Data Send Instruction
+  { // Final Data Send Instruction
     auto instr = child.NewInstr("Send3"); // Send & Produce
     instr.SetDecode(io_valid_out == BvConst(1,1) & step == BvConst(0,2));
 
-    instr.SetUpdate(io_valid_out, BvConst(0,1)); // only 1 on posedge
+    instr.SetUpdate(io_valid_out, BvConst(0,1)); 
     instr.SetUpdate(child_valid, BvConst(0,1));
   }
 }
