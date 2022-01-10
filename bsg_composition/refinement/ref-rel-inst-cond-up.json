@@ -2,14 +2,14 @@
     "instructions": [
       {
         "instruction" : "DATA_IN",
-        "ready bound" : 4,
-        "type": "no output"
+        "ready bound" : 4
+        //"type": "no output"
       },
 
       {
         "instruction" : "TOKEN_IN",
-        "ready bound" : 4,
-        "type": "no output"
+        "ready bound" : 4
+        //"type": "no output"
       }
     ],
     
