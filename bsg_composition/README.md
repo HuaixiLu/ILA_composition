@@ -17,6 +17,7 @@ To run the simulation, you still have to
   - valid == 1 |-> nexttime $stable(valid) until “decode of DATA_Sent”
   - valid == 1 |-> nexttime $stable(valid) until “decode of DATA_Sent”
   - token == 1 |-> nexttime $stable(token) until “decode of TOKEN_Sent”
+  
 **valid_o == 0
   - valid == 0 |-> nexttime $stable(valid) until “decode of DATA_Out” 
   - token == 0 |-> nexttime $stable(token) until “decode of DATA_Out”
