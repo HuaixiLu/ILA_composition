@@ -40,7 +40,7 @@ namespace flex {
   instr.SetDecode(is_write&(m.input(PE_ADDR) == addr & receive));
 
 #define SetDecodeForPEActConfigWr(addr)                                             \
-  instr.SetDecode(is_write&(m.input(PE_ADDR) == addr));
+  instr.SetDecode(is_write&(m.input(PE_ADDR) == addr & receive));
 
 void SetUpdateForConfigWr(Ila& m, InstrRef& instr, const ExprRef& next,
                           const std::string& state_name);

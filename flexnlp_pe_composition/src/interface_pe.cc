@@ -119,7 +119,7 @@ void DefinePEActOutput(Ila& m) {
   // rva_in 
   m.NewBvState("rva_in_ready", 1);
   // act_start
-  m.NewBvState("pe_start_ready", 1);
+  m.NewBvState("act_start_ready", 1);
   // act_port
   m.NewBvState("act_port_ready", 1);
 

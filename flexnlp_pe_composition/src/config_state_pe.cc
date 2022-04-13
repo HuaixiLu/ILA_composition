@@ -62,107 +62,114 @@ void DefinePEActConfigState(Ila& m, const int& pe_idx) {
                ACT_MNGR_CONFIG_REG_OUTPUT_ADDR_BASE_WIDTH);
 
   // ActUnit vector 0-15
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST0),
-               ACT_VECTOR_0_15_CONFIG_REG_INST0_WIDTH);
+  for (auto i = 0; i < 16; i ++) {
+    m.NewBvState(VectorVarName(i, ACT_VECTOR_0_15_CONFIG_REG_INST), ACT_VECTOR_0_15_CONFIG_REG_INST_WIDTH);
+  }
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST0),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST0_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST1),
-               ACT_VECTOR_0_15_CONFIG_REG_INST1_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST1),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST1_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST2),
-               ACT_VECTOR_0_15_CONFIG_REG_INST2_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST2),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST2_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST3),
-               ACT_VECTOR_0_15_CONFIG_REG_INST3_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST3),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST3_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST4),
-               ACT_VECTOR_0_15_CONFIG_REG_INST4_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST4),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST4_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST5),
-               ACT_VECTOR_0_15_CONFIG_REG_INST5_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST5),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST5_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST6),
-               ACT_VECTOR_0_15_CONFIG_REG_INST6_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST6),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST6_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST7),
-               ACT_VECTOR_0_15_CONFIG_REG_INST7_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST7),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST7_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST8),
-               ACT_VECTOR_0_15_CONFIG_REG_INST8_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST8),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST8_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST9),
-               ACT_VECTOR_0_15_CONFIG_REG_INST9_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST9),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST9_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST10),
-               ACT_VECTOR_0_15_CONFIG_REG_INST10_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST10),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST10_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST11),
-               ACT_VECTOR_0_15_CONFIG_REG_INST11_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST11),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST11_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST12),
-               ACT_VECTOR_0_15_CONFIG_REG_INST12_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST12),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST12_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST13),
-               ACT_VECTOR_0_15_CONFIG_REG_INST13_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST13),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST13_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST14),
-               ACT_VECTOR_0_15_CONFIG_REG_INST14_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST14),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST14_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST15),
-               ACT_VECTOR_0_15_CONFIG_REG_INST15_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_0_15_CONFIG_REG_INST15),
+  //              ACT_VECTOR_0_15_CONFIG_REG_INST15_WIDTH);
 
   // ActUnit vector 16-31
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST0),
-               ACT_VECTOR_16_31_CONFIG_REG_INST0_WIDTH);
+  for (auto i = 0; i < 16; i ++) {
+    m.NewBvState(VectorVarName(i, ACT_VECTOR_16_31_CONFIG_REG_INST), ACT_VECTOR_16_31_CONFIG_REG_INST_WIDTH);
+  }
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST1),
-               ACT_VECTOR_16_31_CONFIG_REG_INST1_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST0),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST0_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST2),
-               ACT_VECTOR_16_31_CONFIG_REG_INST2_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST1),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST1_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST3),
-               ACT_VECTOR_16_31_CONFIG_REG_INST3_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST2),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST2_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST4),
-               ACT_VECTOR_16_31_CONFIG_REG_INST4_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST3),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST3_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST5),
-               ACT_VECTOR_16_31_CONFIG_REG_INST5_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST4),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST4_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST6),
-               ACT_VECTOR_16_31_CONFIG_REG_INST6_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST5),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST5_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST7),
-               ACT_VECTOR_16_31_CONFIG_REG_INST7_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST6),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST6_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST8),
-               ACT_VECTOR_16_31_CONFIG_REG_INST8_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST7),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST7_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST9),
-               ACT_VECTOR_16_31_CONFIG_REG_INST9_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST8),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST8_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST10),
-               ACT_VECTOR_16_31_CONFIG_REG_INST10_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST9),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST9_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST11),
-               ACT_VECTOR_16_31_CONFIG_REG_INST11_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST10),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST10_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST12),
-               ACT_VECTOR_16_31_CONFIG_REG_INST12_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST11),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST11_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST13),
-               ACT_VECTOR_16_31_CONFIG_REG_INST13_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST12),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST12_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST14),
-               ACT_VECTOR_16_31_CONFIG_REG_INST14_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST13),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST13_WIDTH);
 
-  m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST15),
-               ACT_VECTOR_16_31_CONFIG_REG_INST15_WIDTH);
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST14),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST14_WIDTH);
+
+  // m.NewBvState(PEGetVarName(pe_idx, ACT_VECTOR_16_31_CONFIG_REG_INST15),
+  //              ACT_VECTOR_16_31_CONFIG_REG_INST15_WIDTH);
   
-  auto help_cfg_mem = 
-    m.NewMemState(PEGetVarName(pe_idx, ACT_VECTOR_STATE_MEM),
-                  TOP_ADDR_IN_WIDTH, TOP_DATA_IN_WIDTH);
-  help_cfg_mem.SetEntryNum(2*CORE_SCALAR);
+  // auto help_cfg_mem = 
+  //   m.NewMemState(PEGetVarName(pe_idx, ACT_VECTOR_STATE_MEM),
+  //                 TOP_ADDR_IN_WIDTH, TOP_DATA_IN_WIDTH);
+  // help_cfg_mem.SetEntryNum(2*CORE_SCALAR);
 };
 
 void DefinePECoreConfigState(Ila& m, const int& pe_idx) {

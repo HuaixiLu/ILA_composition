@@ -64,9 +64,14 @@ ExprRef FetchClusterLUT_Second(Ila& m, const int& pe_idx,
 
 
 ExprRef PEActInstrFetch(Ila& m, const int& pe_idx, const ExprRef& instr_cntr) {
-    auto act_v_table = m.state(PEGetVarName(pe_idx, ACT_VECTOR_STATE_MEM));
-    auto addr = Concat(BvConst(0, 32 - instr_cntr.bit_width()), instr_cntr);
-    return Load(act_v_table, addr);
+    auto result = m.state(VectorVarName(0, ACT_VECTOR_0_15_CONFIG_REG_INST));
+    for (auto i = 0; i < 16; i++) {
+      result = Ite(instr_cntr == i, m.state(VectorVarName(i, ACT_VECTOR_0_15_CONFIG_REG_INST)), result);
+    }
+    for (auto i = 16; i < 32; i ++) {
+      result = Ite(instr_cntr == i, m.state(VectorVarName(i-16, ACT_VECTOR_16_31_CONFIG_REG_INST)), result);
+    }
+    return result;
 }
 
 std::string VectorVarName(const int& v_idx, const std::string& var_name) {

@@ -44,30 +44,38 @@ void AddChildPEAct(Ila& m, const int& pe_idx, const uint64_t& base);
 ExprRef PEActRegLoad_v(Ila& child, const int& pe_idx, const ExprRef& reg_idx,
                        const ExprRef& addr);
 
+void IncrementInst (Ila& m, InstrRef& instr, const int& pe_idx);
+
+// Increment Operation Function
+
 void DefinePEAct(Ila& m, const int& pe_idx) {
+  
   auto config_valid =
       (m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_IS_VALID)) ==
        PE_ACT_VALID);
-  m.SetValid(config_valid);
-
-  // child states
+  
+  auto pe_start = m.input("act_start");
+      
+  // internal states
   auto is_start_reg = m.NewBvState(PEGetVarName(pe_idx, ACT_IS_START_REG),
                                        PE_ACT_IS_START_REG_BITWIDTH);
   auto instr_cntr = m.NewBvState(PEGetVarName(pe_idx, ACT_INSTR_COUNTER),
                                      PE_ACT_INSTR_COUNTER_BITWIDTH);
   auto output_cntr = m.NewBvState(PEGetVarName(pe_idx, ACT_OUTPUT_COUNTER),
                                       PE_ACT_OUTPUT_COUNTER_BITWIDTH);
+  auto state = m.NewBvState(PEGetVarName(pe_idx, ACT_STATE), PE_ACT_STATE_BITWIDTH);
 
-  auto state =
-      m.NewBvState(PEGetVarName(pe_idx, ACT_STATE), PE_ACT_STATE_BITWIDTH);
+  // configure states
+  auto num_instr = m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_NUM_INST));
+  auto num_output = m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_NUM_OUTPUT));
+  
+  // Decode of Instructions
+  auto current_instr = PEActInstrFetch(m, pe_idx, instr_cntr);
+  auto a1 = Extract(current_instr, PE_ACT_REG_A1_HI_IDX, PE_ACT_REG_A1_LO_IDX);
+  auto a2 = Extract(current_instr, PE_ACT_REG_A2_HI_IDX, PE_ACT_REG_A2_LO_IDX);
+  auto op = Extract(current_instr, PE_ACT_OP_HI_IDX, PE_ACT_OP_LO_IDX);
 
-  auto a1 = m.NewBvState(PEGetVarName(pe_idx, ACT_REG_A1),
-                             PE_ACT_REG_IDX_BITWIDTH);
-  auto a2 = m.NewBvState(PEGetVarName(pe_idx, ACT_REG_A2),
-                             PE_ACT_REG_IDX_BITWIDTH);
-  auto op = m.NewBvState(PEGetVarName(pe_idx, ACT_OP), PE_ACT_OP_BITWIDTH);
-
-  // define the register array as memory here
+  // define the register array as memory here: 4x16x20
   for (auto i = 0; i < PE_ACT_REGS_NUM; i++) {
     m.NewMemState(PEGetVarNameVector(pe_idx, i, ACT_REGS),
                       PE_ACT_REGS_ADDR_WIDTH, PE_CORE_ACT_VECTOR_BITWIDTH);
@@ -80,10 +88,6 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
                      PE_CORE_ACT_VECTOR_BITWIDTH);
   }
 
-  // parent states
-  // auto pe_start = m.state(PE_ACT_START_SIGNAL);
-  auto pe_start = m.state(PE_ACT_START_SIGNAL);
-
   // m initial conditions
   m.AddInit(is_start_reg == PE_ACT_INVALID);
   m.AddInit(state == PE_ACT_STATE_IDLE);
@@ -92,7 +96,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_initiate"));
 
     auto not_start_cond = (is_start_reg == PE_ACT_INVALID);
-    auto pe_start_active = (pe_start == PE_ACT_VALID);
+    auto pe_start_active = (pe_start == PE_ACT_VALID) & (m.input("act_start_valid") == PE_ACT_VALID) & (m.state("act_start_ready") == PE_ACT_VALID);
     auto state_idle = (state == PE_ACT_STATE_IDLE);
 
     instr.SetDecode(config_valid & not_start_cond & pe_start_active &
@@ -101,8 +105,6 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     // state updates
     instr.SetUpdate(is_start_reg,
                     BvConst(PE_ACT_VALID, PE_ACT_IS_START_REG_BITWIDTH));
-    instr.SetUpdate(pe_start,
-                    BvConst(PE_ACT_INVALID, PE_START_SIGNAL_SHARED_BITWIDTH));
 
     // reset counter
     instr.SetUpdate(instr_cntr, BvConst(0, PE_ACT_INSTR_COUNTER_BITWIDTH));
@@ -122,102 +124,11 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
       instr.SetUpdate(reg, reg_next);
     }
 
-    // set the FSM state to fetch
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_FETCH, PE_ACT_STATE_BITWIDTH));
-  }
-
-  { // instr1 ---- fetch instruction in the act unit
-    auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_fetch"));
-    auto is_start = (is_start_reg == PE_ACT_VALID);
-    auto state_fetch = (state == PE_ACT_STATE_FETCH);
-
-    instr.SetDecode(is_start & state_fetch);
-
-    // fetch instruction from the instruction register
-    auto current_instr = PEActInstrFetch(m, pe_idx, instr_cntr);
-    auto a1_next =
-        Extract(current_instr, PE_ACT_REG_A1_HI_IDX, PE_ACT_REG_A1_LO_IDX);
-    auto a2_next =
-        Extract(current_instr, PE_ACT_REG_A2_HI_IDX, PE_ACT_REG_A2_LO_IDX);
-    auto op_next = Extract(current_instr, PE_ACT_OP_HI_IDX, PE_ACT_OP_LO_IDX);
-
-    // update opcode and registers
-    instr.SetUpdate(a1, a1_next);
-    instr.SetUpdate(a2, a2_next);
-    instr.SetUpdate(op, op_next);
-
-    // update FSM state
+    // set the FSM state to execute
     instr.SetUpdate(state, BvConst(PE_ACT_STATE_EXEC, PE_ACT_STATE_BITWIDTH));
   }
 
-  { // instr 2 ---- incr state, increment the counter
-    auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_do_incr"));
-    auto is_start = (is_start_reg == PE_ACT_VALID);
-    auto state_incr = (state == PE_ACT_STATE_INCR);
-
-    instr.SetDecode(is_start & state_incr);
-
-    auto num_instr =
-        m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_NUM_INST));
-    auto num_output =
-        m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_NUM_OUTPUT));
-
-    auto is_last_instr = (instr_cntr == num_instr - 1);
-    auto is_last_output = (output_cntr == num_output - 1);
-    auto is_end = is_last_instr & is_last_output;
-
-    auto instr_cntr_next =
-        Ite(is_last_instr, BvConst(0, PE_ACT_INSTR_COUNTER_BITWIDTH),
-            instr_cntr + 1);
-    auto output_cntr_next =
-        Ite(is_end, BvConst(0, PE_ACT_OUTPUT_COUNTER_BITWIDTH),
-            Ite(is_last_instr & !is_last_output, output_cntr + 1, output_cntr));
-    auto is_zero_next =
-        Ite(is_end, BvConst(0, ACT_MNGR_CONFIG_REG_IS_ZERO_FIRST_WIDTH),
-            m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_IS_ZERO_FIRST)));
-
-    instr.SetUpdate(instr_cntr, instr_cntr_next);
-    instr.SetUpdate(output_cntr, output_cntr_next);
-    instr.SetUpdate(
-        m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_IS_ZERO_FIRST)),
-        is_zero_next);
-
-    auto next_state =
-        Ite(is_end, BvConst(PE_ACT_STATE_SEND_DONE, PE_ACT_STATE_BITWIDTH),
-            BvConst(PE_ACT_STATE_FETCH, PE_ACT_STATE_BITWIDTH));
-    auto is_start_reg_next =
-        Ite(is_end, BvConst(PE_ACT_INVALID, PE_ACT_IS_START_REG_BITWIDTH),
-            BvConst(PE_ACT_VALID, PE_ACT_IS_START_REG_BITWIDTH));
-
-    instr.SetUpdate(state, next_state);
-    instr.SetUpdate(is_start_reg, is_start_reg_next);
-  }
-
-  { // instr 3 ---- schedule the pe_done, send pe_done after all the pe are
-    // done.
-    // use a scheduler here to force sequential access to the shared states
-    auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_send_done"));
-    auto state_sd = (state == PE_ACT_STATE_SEND_DONE);
-    auto cntr_valid = (m.state(PE_ACT_DONE_CNTR) == pe_idx);
-
-    instr.SetDecode(state_sd & cntr_valid & (is_start_reg == PE_ACT_INVALID));
-
-    auto all_pe_cond = (m.state(PE_ACT_DONE_CNTR) >= 3);
-    auto pe_cntr_next = Ite(all_pe_cond, BvConst(0, PE_ACT_DONE_CNTR_BITWIDTH),
-                            m.state(PE_ACT_DONE_CNTR) + 1);
-
-    auto next_state = BvConst(PE_ACT_STATE_IDLE, PE_ACT_STATE_BITWIDTH);
-
-    instr.SetUpdate(state, next_state);
-    instr.SetUpdate(m.state(PE_ACT_DONE_CNTR), pe_cntr_next);
-    // push pe_done when all of the four PEs are finish
-    instr.SetUpdate(
-        m.state("done"),
-        Ite(all_pe_cond, BvConst(PE_ACT_VALID, PE_DONE_SIGNAL_SHARED_BITWIDTH),
-            BvConst(PE_ACT_INVALID, PE_DONE_SIGNAL_SHARED_BITWIDTH)));
-  }
-
-  { // instr 4 ---- op 0x1, LOAD instruction with is_zero_first == 1
+  { // instr 1 ---- op 0x1, LOAD instruction with is_zero_first == 1
     auto instr =
         m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_load_zero"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
@@ -233,7 +144,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     // 0417 update: add a MEM FSM state to deal with memory store operation
     // instr.SetUpdate(state, BvConst(PE_ACT_STATE_INCR,
     // PE_ACT_STATE_BITWIDTH));
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst (m, instr, pe_idx);
 
     for (auto i = 0; i < ACT_SCALAR; i++) {
       auto zero = BvConst(0, PE_CORE_ACT_VECTOR_BITWIDTH);
@@ -243,7 +154,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 5 ---- op 0x1, LOAD instruction with is_zero_first == 0
+  { // instr 2 ---- op 0x1, LOAD instruction with is_zero_first == 0
     // LOAD SRAM -> A2 load address is determined by the output_counter +
     // buffer_addr_base
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_load"));
@@ -259,7 +170,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     // next state updates
     // auto next_state = BvConst(PE_ACT_STATE_INCR, PE_ACT_STATE_BITWIDTH);
     // instr.SetUpdate(state, next_state);
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst (m, instr, pe_idx);
 
     auto buffer_addr_base =
         m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_BUFFER_ADDR_BASE));
@@ -285,7 +196,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 6 ---- op 0x2, STORE instruction
+  { // instr 3 ---- op 0x2, STORE instruction
     // STORE SRAM <- A2 Store address is determined by the output_counter +
     // buffer_addr_base
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_store"));
@@ -296,8 +207,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     instr.SetDecode(is_start & state_exec & op_store);
 
     // next FSM state
-    auto next_state = BvConst(PE_ACT_STATE_INCR, PE_ACT_STATE_BITWIDTH);
-    instr.SetUpdate(state, next_state);
+    IncrementInst(m, instr, pe_idx);
 
     auto buffer_addr_base =
         m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_BUFFER_ADDR_BASE));
@@ -330,24 +240,23 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     instr.SetUpdate(buffer, buffer_next);
   }
 
-  { // instr 7 ---- op 0x3, INPE instruction
+  { // instr 4 ---- op 0x3, INPE instruction
     // INPE act_port -> A2 Do not increment instruction if nothing recieved
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_inpe"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
     auto state_exec = (state == PE_ACT_STATE_EXEC);
     auto op_inpe_ready = (op == PE_ACT_OP_INPE);
     // halt the instruction when there is no data pushed to the port
-    auto port_valid = (m.input(PEGetVarName(pe_idx, CORE_ACT_REG_PORT_VALID)) == PE_ACT_VALID);
+    auto port_valid = (m.input(PEGetVarName(pe_idx, CORE_ACT_REG_PORT_VALID)) == PE_ACT_VALID & m.state("act_port_ready") == PE_ACT_VALID);
 
     instr.SetDecode(is_start & state_exec & op_inpe_ready & port_valid);
 
     // set the port from pe core to be invalid in PE_Core
-    instr.SetUpdate(
-        m.state("act_port_ready"),
+    instr.SetUpdate(m.state("act_port_ready"),
         BvConst(PE_ACT_INVALID, PE_CORE_ACT_REG_PORT_VALID_BITWIDTH));
 
     // next state
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst(m, instr, pe_idx);
 
     for (auto i = 0; i < ACT_SCALAR; i++) {
       auto data = m.input(PEGetVarNameVector(pe_idx, i, CORE_ACT_VECTOR));
@@ -356,7 +265,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 8 ---- op 0x4, OUTGB, output result to GB
+  { // instr 5 ---- op 0x4, OUTGB, output result to GB
     // OUTGB A2 -> Output A2 to GB
     // TODO: Need to make sequential access to the shared states
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_outgb"));
@@ -367,22 +276,13 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     // need to check whether gb has popped the previous data
     auto data_out_invalid =
         (m.state("output_port_valid") == PE_ACT_INVALID);
-    auto cntr_valid = (m.state(PE_ACT_OUTGB_CNTR) == pe_idx);
 
-    instr.SetDecode(is_start & state_exec & op_outgb & data_out_invalid &
-                    cntr_valid);
+    instr.SetDecode(is_start & state_exec & op_outgb & data_out_invalid);
 
-    auto all_pe_cond = (m.state(PE_ACT_OUTGB_CNTR) >= 3);
-    auto pe_cntr_next = Ite(all_pe_cond, BvConst(0, PE_ACT_OUTGB_CNTR_BITWIDTH),
-                            m.state(PE_ACT_OUTGB_CNTR) + 1);
-    // update pe counter
-    instr.SetUpdate(m.state(PE_ACT_OUTGB_CNTR), pe_cntr_next);
     // update FSM state
-    auto next_state = BvConst(PE_ACT_STATE_INCR, PE_ACT_STATE_BITWIDTH);
-    instr.SetUpdate(state, next_state);
+    IncrementInst(m, instr, pe_idx);
     // set the gb_control_data_in to be valid
-    instr.SetUpdate(m.state("output_port_valid"),
-                    BvConst(PE_ACT_VALID, 1));
+    instr.SetUpdate(m.state("output_port_valid"), BvConst(PE_ACT_VALID, 1));
 
     auto output_base_addr =
         m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_OUTPUT_ADDR_BASE));
@@ -405,7 +305,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 9 ---- op 0x7, COPY
+  { // instr 6 ---- op 0x7, COPY
     // COPY A1 -> A2
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_copy"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
@@ -417,7 +317,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     // FSM Update
     // auto next_state = BvConst(PE_ACT_STATE_INCR, PE_ACT_STATE_BITWIDTH);
     // instr.SetUpdate(state, next_state);
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst(m, instr, pe_idx);
 
     for (auto i = 0; i < ACT_SCALAR; i++) {
       auto reg_addr = BvConst(i, PE_ACT_REGS_ADDR_WIDTH) +
@@ -428,7 +328,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 10 ---- op 0x8, EADD, A2 = A2 + A1
+  { // instr 7 ---- op 0x8, EADD, A2 = A2 + A1
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_eadd"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
     auto state_exec = (state == PE_ACT_STATE_EXEC);
@@ -439,7 +339,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     // Next FSM state
     // auto next_state = BvConst(PE_ACT_STATE_INCR, PE_ACT_STATE_BITWIDTH);
     // instr.SetUpdate(state, next_state);
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst(m, instr, pe_idx);
 
     for (auto i = 0; i < ACT_SCALAR; i++) {
       auto reg_addr = BvConst(i, PE_ACT_REGS_ADDR_WIDTH) +
@@ -453,7 +353,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 11 ---- op 0x9, EMUL, A2 = A2 * A1
+  { // instr 8 ---- op 0x9, EMUL, A2 = A2 * A1
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_emul"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
     auto state_exec = (state == PE_ACT_STATE_EXEC);
@@ -463,7 +363,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     // Next FSM state
     // auto next_state = BvConst(PE_ACT_STATE_INCR, PE_ACT_STATE_BITWIDTH);
     // instr.SetUpdate(state, next_state);
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst(m, instr, pe_idx);
 
     for (auto i = 0; i < ACT_SCALAR; i++) {
       auto reg_addr = BvConst(i, PE_ACT_REGS_ADDR_WIDTH) +
@@ -478,7 +378,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 12 ---- op 0xA, SIGM, A2 = Sigmoid(A2)
+  { // instr 9 ---- op 0xA, SIGM, A2 = Sigmoid(A2)
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_sigm"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
     auto state_exec = (state == PE_ACT_STATE_EXEC);
@@ -489,7 +389,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     // Next FSM state
     // auto next_state = BvConst(PE_ACT_STATE_INCR, PE_ACT_STATE_BITWIDTH);
     // instr.SetUpdate(state, next_state);
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst(m, instr, pe_idx);
 
     for (auto i = 0; i < ACT_SCALAR; i++) {
       auto reg_addr = BvConst(i, PE_ACT_REGS_ADDR_WIDTH) +
@@ -503,7 +403,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 13 ---- op 0xB, TANH, A2 = TANH(A2)
+  { // instr 10 ---- op 0xB, TANH, A2 = TANH(A2)
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_tanh"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
     auto state_exec = (state == PE_ACT_STATE_EXEC);
@@ -512,7 +412,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     instr.SetDecode(is_start & state_exec & op_tanh);
 
     // Next FSM state
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst(m, instr, pe_idx);
 
     for (auto i = 0; i < ACT_SCALAR; i++) {
       auto reg_addr = BvConst(i, PE_ACT_REGS_ADDR_WIDTH) +
@@ -526,7 +426,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 14 ---- op 0xC, RELU, A2 = RELU(A2)
+  { // instr 11 ---- op 0xC, RELU, A2 = RELU(A2)
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_relu"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
     auto state_exec = (state == PE_ACT_STATE_EXEC);
@@ -535,7 +435,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     instr.SetDecode(is_start & state_exec & op_relu);
 
     // Next FSM state
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst(m, instr, pe_idx);
 
     for (auto i = 0; i < ACT_SCALAR; i++) {
       auto reg_addr = BvConst(i, PE_ACT_REGS_ADDR_WIDTH) +
@@ -549,7 +449,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     }
   }
 
-  { // instr 15 ---- op 0xD, ONEX, A2 = 1 - A2
+  { // instr 12 ---- op 0xD, ONEX, A2 = 1 - A2
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_op_onex"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
     auto state_exec = (state == PE_ACT_STATE_EXEC);
@@ -558,7 +458,7 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
     instr.SetDecode(is_start & state_exec & op_onex);
 
     // Next FSM state
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_MEM, PE_ACT_STATE_BITWIDTH));
+    IncrementInst(m, instr, pe_idx);
 
     // Onex is also element wise
     for (auto i = 0; i < ACT_SCALAR; i++) {
@@ -575,28 +475,52 @@ void DefinePEAct(Ila& m, const int& pe_idx) {
 
   // 04172020 update: add a new state for register file store, decrease the time
   // to generate systemc models
-  { // instr 16 ---- store data into the register file
+  { // instr 13 ---- store data into the register file
     auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_reg_store"));
     auto is_start = (is_start_reg == PE_ACT_VALID);
-    auto state_mem = (state == PE_ACT_STATE_MEM);
+    auto output_not_val = (m.state("output_port_valid") == BvConst(0,1));
+    auto not_done = (m.state("done_valid") == BvConst(0,1));
+    auto state_mem = (state == PE_ACT_STATE_DATA) & output_not_val & not_done;
 
     instr.SetDecode(is_start & state_mem);
 
-    instr.SetUpdate(state, BvConst(PE_ACT_STATE_INCR, PE_ACT_STATE_BITWIDTH));
+    instr.SetUpdate(state, BvConst(PE_ACT_STATE_EXEC, PE_ACT_STATE_BITWIDTH));
+    instr.SetUpdate(is_start_reg, is_start_reg);
 
-    for (auto i = 0; i < PE_ACT_REGS_NUM; i++) {
-      auto reg = m.state(PEGetVarNameVector(pe_idx, i, ACT_REGS));
-      auto reg_next = reg;
-      for (auto j = 0; j < ACT_SCALAR; j++) {
-        auto data = m.state(PEGetVarNameVector(pe_idx, j, ACT_REG_TEMP));
-        auto addr = BvConst(j, PE_ACT_REGS_ADDR_WIDTH) +
-                    BvConst(0, PE_ACT_REGS_ADDR_WIDTH);
+    // for (auto i = 0; i < PE_ACT_REGS_NUM; i++) {
+    //   auto reg = m.state(PEGetVarNameVector(pe_idx, i, ACT_REGS));
+    //   auto reg_next = reg;
+    //   for (auto j = 0; j < ACT_SCALAR; j++) {
+    //     auto data = m.state(PEGetVarNameVector(pe_idx, j, ACT_REG_TEMP));
+    //     auto addr = BvConst(j, PE_ACT_REGS_ADDR_WIDTH) +
+    //                 BvConst(0, PE_ACT_REGS_ADDR_WIDTH);
 
-        reg_next = Ite(a2 == i, Store(reg_next, addr, data), reg_next);
-      }
-      instr.SetUpdate(reg, reg_next);
-    }
+    //     reg_next = Ite(a2 == i, Store(reg_next, addr, data), reg_next);
+    //   }
+    //   instr.SetUpdate(reg, reg_next);
+    // }
   }
+
+  { //instr 14 -- Out_sent
+    auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_out_sent"));
+    auto is_start = (is_start_reg == PE_ACT_VALID);
+    auto output_sent = (m.state("output_port_valid") == BvConst(1,1)) & (m.input("output_port_ready") == BvConst(1,1));
+    auto state_mem = (state == PE_ACT_STATE_DATA) & output_sent;
+    instr.SetDecode(is_start & state_mem);
+
+    instr.SetUpdate(m.state("output_port_valid"), BvConst(0,1));
+  }
+
+  { //instr 15 -- Done_sent
+    auto instr = m.NewInstr(PEGetInstrName(pe_idx, "act_child_done_sent"));
+    auto is_start = (is_start_reg == PE_ACT_VALID);
+    auto done_sent = (m.state("done_valid") == BvConst(1,1)) & (m.input("done_ready") == BvConst(1,1));
+    auto state_mem = (state == PE_ACT_STATE_DATA) & done_sent;
+    instr.SetDecode(is_start & state_mem);
+
+    instr.SetUpdate(m.state("done_valid"), BvConst(0,1));
+  }
+
 }
 
 /****** helper function for PE Act m instructions **********/
@@ -609,6 +533,44 @@ ExprRef PEActRegLoad_v(Ila& m, const int& pe_idx, const ExprRef& reg_idx,
   }
   return result;
 }
+
+void IncrementInst (Ila& m, InstrRef& instr, const int& pe_idx) {
+  // state variables to update
+    auto is_start_reg = m.state(PEGetVarName(pe_idx, ACT_IS_START_REG));
+    auto instr_cntr = m.state(PEGetVarName(pe_idx, ACT_INSTR_COUNTER));
+    auto output_cntr = m.state(PEGetVarName(pe_idx, ACT_OUTPUT_COUNTER));
+    auto state = m.state(PEGetVarName(pe_idx, ACT_STATE));
+  // configure states
+    auto num_instr = m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_NUM_INST));
+    auto num_output = m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_NUM_OUTPUT));
+
+  // end logic
+    auto is_last_instr = (instr_cntr == num_instr - 1);
+    auto is_last_output = (output_cntr == num_output - 1);
+    auto is_end = is_last_instr & is_last_output;
+
+    auto instr_cntr_next = Ite(is_last_instr, BvConst(0, PE_ACT_INSTR_COUNTER_BITWIDTH),
+            instr_cntr + 1);
+    auto output_cntr_next = Ite(is_end, BvConst(0, PE_ACT_OUTPUT_COUNTER_BITWIDTH),
+            Ite(is_last_instr & !is_last_output, output_cntr + 1, output_cntr));
+    auto is_zero_next = Ite(is_end, BvConst(0, ACT_MNGR_CONFIG_REG_IS_ZERO_FIRST_WIDTH),
+            m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_IS_ZERO_FIRST)));
+    auto done_next = Ite(is_end, BvConst(1, PE_DONE_SIGNAL_SHARED_BITWIDTH), m.state("done"));
+    auto done_val_next = Ite(is_end, BvConst(1, 1), BvConst(0,1));
+
+  // Update the instr counters to check 
+    instr.SetUpdate(instr_cntr, instr_cntr_next);
+    instr.SetUpdate(output_cntr, output_cntr_next);
+    instr.SetUpdate(m.state(PEGetVarName(pe_idx, ACT_MNGR_CONFIG_REG_IS_ZERO_FIRST)), is_zero_next);
+
+    instr.SetUpdate(m.state("done"), done_next);
+    instr.SetUpdate(m.state("done_valid"), done_val_next);
+
+    instr.SetUpdate(state, BvConst(PE_ACT_STATE_DATA, PE_ACT_STATE_BITWIDTH));
+    instr.SetUpdate(is_start_reg, is_start_reg);
+}
+
+
 
 } // namespace flex
 

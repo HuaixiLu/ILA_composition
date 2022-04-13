@@ -75,17 +75,9 @@ void DefinePEActOtherState(Ila& m, const int& pe_idx) {
                                      TOP_ADDR_IN_WIDTH, TOP_DATA_IN_WIDTH);
   pe_act_buffer.SetEntryNum(ACT_BUFFER_BUFFER_SIZE);
 
-  m.NewBvState(PE_ACT_START_SIGNAL, PE_START_SIGNAL_SHARED_BITWIDTH);
-
   //
   // define PE shared internal states here
   //
-  // counter for recording pe
-  m.NewBvState(PE_CORE_CNTR, PE_CORE_CNTR_BIWTDTH);
-  // counter for pe sending back data to GB
-  m.NewBvState(PE_ACT_OUTGB_CNTR, PE_ACT_OUTGB_CNTR_BITWIDTH);
-  // counter for pe seding pe_done to GB
-  m.NewBvState(PE_ACT_DONE_CNTR, PE_ACT_DONE_CNTR_BITWIDTH);
 }
 
 } // namespace flex

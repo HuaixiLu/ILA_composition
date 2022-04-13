@@ -42,8 +42,6 @@ void DefinePECoreInitConditions(Ila& m) {
 
 void DefinePEActInitConditions(Ila& m) {
 
-  m.AddInit(m.state(PE_ACT_OUTGB_CNTR) == 0);
-  m.AddInit(m.state(PE_ACT_DONE_CNTR) == 0);
 }
 
 } // namespace flex

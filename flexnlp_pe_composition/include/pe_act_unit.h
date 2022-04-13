@@ -72,7 +72,7 @@ namespace flex {
 
 // config register: buffer_addr_base
 #define ACT_MNGR_CONFIG_REG_BUFFER_ADDR_BASE "act_mngr_buffer_addr_base"
-#define ACT_MNGR_CONFIG_REG_BUFFER_ADDR_BASE_WIDTH 16
+#define ACT_MNGR_CONFIG_REG_BUFFER_ADDR_BASE_WIDTH 5
 
 // config register: output_addr_base
 #define ACT_MNGR_CONFIG_REG_OUTPUT_ADDR_BASE "act_mngr_output_addr_base"
@@ -81,6 +81,9 @@ namespace flex {
 //
 // ActUnit vector 0-15
 //
+#define ACT_VECTOR_0_15_CONFIG_REG_INST "act_vector_0_15_Inst"
+#define ACT_VECTOR_0_15_CONFIG_REG_INST_WIDTH 8
+
 
 // config register: Inst0
 #define ACT_VECTOR_0_15_CONFIG_REG_INST0 "act_vector_0_15_Inst0"
@@ -149,6 +152,9 @@ namespace flex {
 //
 // ActUnit vector 16-31
 //
+
+#define ACT_VECTOR_16_31_CONFIG_REG_INST "act_vector_16_31_Inst"
+#define ACT_VECTOR_16_31_CONFIG_REG_INST_WIDTH 8
 
 // config register: Inst0
 #define ACT_VECTOR_16_31_CONFIG_REG_INST0 "act_vector_16_31_Inst0"
@@ -237,6 +243,7 @@ namespace flex {
 // PE Act Register
 #define PE_ACT_REGS_NUM 4
 #define PE_ACT_REGS_ADDR_WIDTH 4 // 16 entries per vector
+#define PE_ACT_REGS_DATA_WIDTH 320
 #define ACT_REGS "act_regs"
 
 // PE Act control flag
@@ -251,13 +258,10 @@ namespace flex {
 
 // ACT FSM STATE
 #define ACT_STATE "act_state"
-#define PE_ACT_STATE_BITWIDTH 3
-#define PE_ACT_STATE_FETCH 0
+#define PE_ACT_STATE_BITWIDTH 2
+#define PE_ACT_STATE_IDLE 0
 #define PE_ACT_STATE_EXEC 1
-#define PE_ACT_STATE_INCR 2
-#define PE_ACT_STATE_SEND_DONE 3
-#define PE_ACT_STATE_IDLE 4
-#define PE_ACT_STATE_MEM 5
+#define PE_ACT_STATE_DATA 2
 
 // ACT opcode
 #define ACT_OP "act_op"
